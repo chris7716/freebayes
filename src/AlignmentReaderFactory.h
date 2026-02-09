@@ -12,12 +12,10 @@ namespace freebayes {
  * Supported alignment file formats
  */
 enum class AlignmentFormat {
-    AUTO_DETECT,    // Detect format from file extension or magic bytes
     BAM,            // Binary Alignment Map
     CRAM,           // Reference-based compressed alignment
     SAM,            // Sequence Alignment/Map (text)
-    PAF,            // Pairwise mApping Format (long reads)
-    UNKNOWN         // Unknown/unsupported format
+    GBAM          // GABM format
 };
 
 /**
