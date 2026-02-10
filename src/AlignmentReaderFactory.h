@@ -54,7 +54,7 @@ public:
      * Checks file extension and, if available, magic bytes.
      *
      * @param path Path to alignment file
-     * @return Detected format, or AUTO_DETECT if cannot determine
+     * @return Detected format (defaults to BAM if cannot determine)
      */
     static AlignmentFormat detectFormat(const std::string& path);
 
@@ -62,7 +62,7 @@ public:
      * Detect format from file extension only.
      *
      * @param path File path
-     * @return Format based on extension
+     * @return Format based on extension (defaults to BAM if unknown)
      */
     static AlignmentFormat detectFormatFromExtension(const std::string& path);
 
@@ -71,7 +71,7 @@ public:
      * Requires file to exist and be readable.
      *
      * @param path File path
-     * @return Format based on magic bytes, or UNKNOWN if cannot read
+     * @return Format based on magic bytes (defaults to BAM if cannot read)
      */
     static AlignmentFormat detectFormatFromMagic(const std::string& path);
 
@@ -86,8 +86,8 @@ public:
     /**
      * Convert string name to format enum.
      *
-     * @param name Format name (case-insensitive: "bam", "cram", "sam", "paf")
-     * @return Format enum value, or UNKNOWN if not recognized
+     * @param name Format name (case-insensitive: "bam", "cram", "sam", "gbam")
+     * @return Format enum value (defaults to BAM if not recognized)
      */
     static AlignmentFormat stringToFormat(const std::string& name);
 };
