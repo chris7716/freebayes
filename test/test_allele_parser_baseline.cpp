@@ -18,6 +18,11 @@
 #include <iostream>
 #include <cassert>
 #include <cstring>
+#include <getopt.h>
+
+// Declare getopt globals (needed to reset state between tests)
+extern int optind;
+extern int opterr;
 
 // Simple test framework
 #define TEST(name) void test_##name()
@@ -49,6 +54,14 @@ private:
     std::vector<char*> argv_;
 
 public:
+    // Constructor resets getopt state to allow multiple tests to parse args
+    ArgBuilder() {
+        // CRITICAL: Reset getopt global state between tests
+        // Without this, only the first test will successfully parse arguments
+        optind = 1;
+        opterr = 0;
+    }
+
     ArgBuilder& add(const std::string& arg) {
         args_.push_back(arg);
         return *this;
