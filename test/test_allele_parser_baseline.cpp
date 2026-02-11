@@ -18,6 +18,7 @@
 #include <iostream>
 #include <cassert>
 #include <cstring>
+#include <cmath>
 #include <getopt.h>
 
 // Declare getopt globals (needed to reset state between tests)
@@ -46,6 +47,7 @@ extern int opterr;
 #define ASSERT_GE(a, b) ASSERT((a) >= (b))
 #define ASSERT_TRUE(a) ASSERT(a)
 #define ASSERT_FALSE(a) ASSERT(!(a))
+#define ASSERT_DOUBLE_EQ(a, b) ASSERT(std::abs((a) - (b)) < 0.0001)
 
 // Helper to create command-line arguments
 class ArgBuilder {
@@ -325,7 +327,7 @@ TEST(HandlesMinAltFractionParameter) {
 
     AlleleParser parser(args.argc(), args.argv());
 
-    ASSERT_EQ(parser.parameters.minAltFraction, 0.2);
+    ASSERT_DOUBLE_EQ(parser.parameters.minAltFraction, 0.2);
 }
 
 TEST(HandlesPloidyParameter) {
