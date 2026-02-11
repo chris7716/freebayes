@@ -127,6 +127,7 @@ endif
 #
 freebayes_common_src = files(
     'src/Allele.cpp',
+    'src/AlignmentReaderFactory.cpp',
     'src/AlleleParser.cpp',
     'src/BedReader.cpp',
     'src/Bias.cpp',
@@ -147,6 +148,7 @@ freebayes_common_src = files(
     'src/ResultData.cpp',
     'src/Sample.cpp',
     'src/SegfaultHandler.cpp',
+    'src/SeqLibAlignmentReader.cpp',
     'src/Utility.cpp',
     )
 
@@ -227,9 +229,57 @@ executable('bamleftalign',
 
 testdir = meson.current_source_dir()+'/test'
 
+# C++ unit test executables
+test_allele_parser_baseline = executable(
+    'test_allele_parser_baseline',
+    files('test/test_allele_parser_baseline.cpp'),
+    include_directories : [incdir, vcflib_inc, fastahack_inc],
+    cpp_args : extra_cpp_args,
+    link_args: link_arguments,
+    dependencies: [zlib_dep,
+                   lzma_dep,
+                   wfa2lib_dep,
+                   vcflib_dep,
+                   thread_dep,
+                   htslib_dep,
+                   tabixpp_dep,
+                   seqlib_dep,
+                   fastahack_dep,
+                   smithwaterman_dep
+                   ],
+    link_with : [freebayes_lib],
+    build_by_default: false
+)
+
+test_alignment_interfaces = executable(
+    'test_alignment_interfaces',
+    files('test/test_alignment_interfaces.cpp'),
+    include_directories : [incdir, vcflib_inc, fastahack_inc],
+    cpp_args : extra_cpp_args,
+    link_args: link_arguments,
+    dependencies: [zlib_dep,
+                   lzma_dep,
+                   wfa2lib_dep,
+                   vcflib_dep,
+                   thread_dep,
+                   htslib_dep,
+                   tabixpp_dep,
+                   seqlib_dep,
+                   fastahack_dep,
+                   smithwaterman_dep
+                   ],
+    link_with : [freebayes_lib],
+    build_by_default: false
+)
+
+# Bash TAP tests
 prove = find_program('prove')
 test('T00', prove, args : ['-e','bash','-v','t/00_region_and_target_handling.t'], workdir: testdir)
 test('T01', prove, args : ['-e','bash','-v','t/01_call_variants.t'], workdir : testdir )
 test('T01b', prove, args : ['-e','bash','-v','t/01b_call_variants.t'], workdir : testdir )
 test('T02', prove, args : ['-e','bash','-v','t/02_multi_bam.t'], workdir : testdir )
 test('T03', prove, args : ['-e','bash','-v','t/03_reference_bases.t'], workdir: testdir )
+
+# C++ unit tests
+test('test_allele_parser_baseline', test_allele_parser_baseline, workdir: testdir)
+test('test_alignment_interfaces', test_alignment_interfaces, workdir: testdir)
