@@ -319,8 +319,8 @@ TEST(HandlesRegionParameter) {
 
     AlleleParser parser(args.argc(), args.argv());
 
-    // Should have parsed the region
-    ASSERT_FALSE(parser.parameters.region.empty());
+    // Should have parsed the region (note: Parameters uses "regions" plural)
+    ASSERT_FALSE(parser.parameters.regions.empty());
 }
 
 // ===== Coverage & Depth Tests =====
