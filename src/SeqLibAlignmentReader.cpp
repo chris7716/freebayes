@@ -102,7 +102,17 @@ bool SeqLibAlignment::getTag(const std::string& tag, int& value) const {
 }
 
 bool SeqLibAlignment::getTag(const std::string& tag, double& value) const {
-    return record_.GetDoubleTag(tag, value);
+    // SeqLib doesn't have GetDoubleTag, use GetSmartDoubleTag or parse from string
+    std::string strValue;
+    if (record_.GetZTag(tag, strValue)) {
+        try {
+            value = std::stod(strValue);
+            return true;
+        } catch (...) {
+            return false;
+        }
+    }
+    return false;
 }
 
 // ===== SeqLibAlignmentReader Implementation =====
