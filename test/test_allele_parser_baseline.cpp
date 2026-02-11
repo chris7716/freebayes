@@ -131,9 +131,9 @@ TEST(LoadsReferenceSequence) {
 
     AlleleParser parser(args.argc(), args.argv());
 
-    // Reference sequence should be loaded
-    ASSERT_FALSE(parser.referenceSequenceNames.empty());
-    ASSERT_EQ(parser.referenceSequenceNames[0], "ref");
+    // Reference sequence should be loaded from BAM into referenceIDToName map
+    ASSERT_FALSE(parser.referenceIDToName.empty());
+    ASSERT_EQ(parser.referenceIDToName[0], "ref");
 }
 
 TEST(LoadsBamFiles) {
