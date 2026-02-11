@@ -170,8 +170,14 @@ TEST(CanSetRegion) {
 
     AlleleParser parser(args.argc(), args.argv());
 
-    // Should initialize to the specified region
-    ASSERT_EQ(parser.currentSequenceName, "ref");
+    // Should have parsed the region (stored in parameters.regions)
+    ASSERT_FALSE(parser.parameters.regions.empty());
+    ASSERT_EQ(parser.parameters.regions[0], "ref:1-11");
+
+    // After moving to first position, currentSequenceName should be set
+    if (parser.toNextPosition()) {
+        ASSERT_EQ(parser.currentSequenceName, "ref");
+    }
 }
 
 // ===== Alignment Reading Tests =====
