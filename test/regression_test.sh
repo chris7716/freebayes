@@ -111,7 +111,6 @@ if run_test "basic" \
 else
     FAILED=$((FAILED + 1))
 fi
-echo "basic Test done"
 
 # Test 2: With region specified
 if run_test "region" \
@@ -135,7 +134,6 @@ fi
 
 # If tiny data exists, test with it
 if [ -f "${SCRIPT_DIR}/tiny/q.fa" ] && [ -f "${SCRIPT_DIR}/tiny/NA12878.chr22.tiny.bam" ]; then
-    echo "tiny Test starting"
     if run_test "tiny_chr22" \
         "${SCRIPT_DIR}/tiny/q.fa" \
         "${SCRIPT_DIR}/tiny/NA12878.chr22.tiny.bam" \
@@ -145,7 +143,6 @@ if [ -f "${SCRIPT_DIR}/tiny/q.fa" ] && [ -f "${SCRIPT_DIR}/tiny/NA12878.chr22.ti
         FAILED=$((FAILED + 1))
     fi
 fi
-echo "tiny Test done"
 
 # Summary
 echo ""
