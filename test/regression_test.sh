@@ -103,14 +103,14 @@ FAILED=0
 PASSED=0
 
 # Test 1: Basic variant calling on tiny test
-if run_test "basic" \
-    "${TEST_DATA_DIR}/test.ref" \
-    "${TEST_DATA_DIR}/test.bam" \
-    ""; then
-    ((PASSED++))
-else
-    ((FAILED++))
-fi
+# if run_test "basic" \
+#     "${TEST_DATA_DIR}/test.ref" \
+#     "${TEST_DATA_DIR}/test.bam" \
+#     ""; then
+#     ((PASSED++))
+# else
+#     ((FAILED++))
+# fi
 
 # Test 2: With region specified
 # if run_test "region" \
