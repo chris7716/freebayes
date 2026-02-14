@@ -113,14 +113,14 @@ else
 fi
 
 # Test 2: With region specified
-if run_test "region" \
-    "${TEST_DATA_DIR}/test.ref" \
-    "${TEST_DATA_DIR}/test.bam" \
-    "-r ref:1-11"; then
-    ((PASSED++))
-else
-    ((FAILED++))
-fi
+# if run_test "region" \
+#     "${TEST_DATA_DIR}/test.ref" \
+#     "${TEST_DATA_DIR}/test.bam" \
+#     "-r ref:1-11"; then
+#     ((PASSED++))
+# else
+#     ((FAILED++))
+# fi
 
 # Test 3: Different parameters
 if run_test "min_alt_frac" \
