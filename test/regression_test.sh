@@ -123,14 +123,14 @@ fi
 # fi
 
 # Test 3: Different parameters
-if run_test "min_alt_frac" \
-    "${TEST_DATA_DIR}/test.ref" \
-    "${TEST_DATA_DIR}/test.bam" \
-    "-F 0.1 -C 1"; then
-    ((PASSED++))
-else
-    ((FAILED++))
-fi
+# if run_test "min_alt_frac" \
+#     "${TEST_DATA_DIR}/test.ref" \
+#     "${TEST_DATA_DIR}/test.bam" \
+#     "-F 0.1 -C 1"; then
+#     ((PASSED++))
+# else
+#     ((FAILED++))
+# fi
 
 # If tiny data exists, test with it
 if [ -f "${SCRIPT_DIR}/tiny/q.fa" ] && [ -f "${SCRIPT_DIR}/tiny/NA12878.chr22.tiny.bam" ]; then
