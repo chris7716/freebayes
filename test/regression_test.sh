@@ -113,7 +113,7 @@ else
 fi
 echo "basic Test done"
 
-Test 2: With region specified
+# Test 2: With region specified
 if run_test "region" \
     "${TEST_DATA_DIR}/test.ref" \
     "${TEST_DATA_DIR}/test.bam" \
@@ -123,7 +123,7 @@ else
     FAILED=$((FAILED + 1))
 fi
 
-Test 3: Different parameters
+# Test 3: Different parameters
 if run_test "min_alt_frac" \
     "${TEST_DATA_DIR}/test.ref" \
     "${TEST_DATA_DIR}/test.bam" \
