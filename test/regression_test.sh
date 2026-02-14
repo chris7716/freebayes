@@ -102,7 +102,7 @@ echo "========================================"
 FAILED=0
 PASSED=0
 
-Test 1: Basic variant calling on tiny test
+# Test 1: Basic variant calling on tiny test
 if run_test "basic" \
     "${TEST_DATA_DIR}/test.ref" \
     "${TEST_DATA_DIR}/test.bam" \
