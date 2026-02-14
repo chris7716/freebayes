@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Simple regression test for freebayes
 # Runs freebayes on test data and compares output to baseline
