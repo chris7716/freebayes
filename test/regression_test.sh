@@ -107,31 +107,31 @@ if run_test "basic" \
     "${TEST_DATA_DIR}/test.ref" \
     "${TEST_DATA_DIR}/test.bam" \
     ""; then
-    ((PASSED++))
+    PASSED=$((PASSED + 1))
 else
-    ((FAILED++))
+    FAILED=$((FAILED + 1))
 fi
 echo "basic Test done"
 
-# Test 2: With region specified
-# if run_test "region" \
-#     "${TEST_DATA_DIR}/test.ref" \
-#     "${TEST_DATA_DIR}/test.bam" \
-#     "-r ref:1-11"; then
-#     ((PASSED++))
-# else
-#     ((FAILED++))
-# fi
+Test 2: With region specified
+if run_test "region" \
+    "${TEST_DATA_DIR}/test.ref" \
+    "${TEST_DATA_DIR}/test.bam" \
+    "-r ref:1-11"; then
+    PASSED=$((PASSED + 1))
+else
+    FAILED=$((FAILED + 1))
+fi
 
-# Test 3: Different parameters
-# if run_test "min_alt_frac" \
-#     "${TEST_DATA_DIR}/test.ref" \
-#     "${TEST_DATA_DIR}/test.bam" \
-#     "-F 0.1 -C 1"; then
-#     ((PASSED++))
-# else
-#     ((FAILED++))
-# fi
+Test 3: Different parameters
+if run_test "min_alt_frac" \
+    "${TEST_DATA_DIR}/test.ref" \
+    "${TEST_DATA_DIR}/test.bam" \
+    "-F 0.1 -C 1"; then
+    PASSED=$((PASSED + 1))
+else
+    FAILED=$((FAILED + 1))
+fi
 
 # If tiny data exists, test with it
 if [ -f "${SCRIPT_DIR}/tiny/q.fa" ] && [ -f "${SCRIPT_DIR}/tiny/NA12878.chr22.tiny.bam" ]; then
@@ -140,9 +140,9 @@ if [ -f "${SCRIPT_DIR}/tiny/q.fa" ] && [ -f "${SCRIPT_DIR}/tiny/NA12878.chr22.ti
         "${SCRIPT_DIR}/tiny/q.fa" \
         "${SCRIPT_DIR}/tiny/NA12878.chr22.tiny.bam" \
         "-r q:1-1000"; then
-        ((PASSED++))
+        PASSED=$((PASSED + 1))
     else
-        ((FAILED++))
+        FAILED=$((FAILED + 1))
     fi
 fi
 echo "tiny Test done"
