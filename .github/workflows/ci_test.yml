@@ -23,6 +23,19 @@ jobs:
       run: ninja -C build/ -v
     - name: Run tests
       run: meson test --timeout-multiplier 4 --print-errorlogs -C build/
+    - name: Run regression tests
+      run: |
+        cd test
+        ./regression_test.sh
+    - name: Upload regression test artifacts on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: regression-test-results
+        path: |
+          test/regression_output/*.vcf
+          test/regression_output/*.diff
+        retention-days: 7
 
   build-aarch64:
     name: freebayes-CI aarch64
