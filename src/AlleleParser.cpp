@@ -2154,7 +2154,7 @@ void AlleleParser::updateAlignmentQueue(long int position,
                     }
                 }
             }
-	    } while ((hasMoreAlignments = GETNEXT(bamMultiReader, currentAlignment))
+	    } while ((hasMoreAlignments = getNextAlignmentInternal(currentAlignment))
                  && currentAlignment.POSITION <= position
                  && currentAlignment.REFID == currentRefID);
     }
@@ -2800,14 +2800,40 @@ bool AlleleParser::loadTarget(BedTarget* target) {
 
 }
 
+// Helper method to abstract alignment reading (interface vs legacy)
+bool AlleleParser::getNextAlignmentInternal(BAMALIGN& alignment) {
+    if (alignmentReader_) {
+        // Use interface-based reader
+        if (!alignmentReader_->getNextAlignment(currentAlignment_)) {
+            return false;
+        }
+
+        // Extract underlying BamRecord from SeqLibAlignment
+        // Note: This assumes we're using SeqLibAlignment implementation
+        // For now, we need to access the wrapped record
+        // TODO: This is a temporary bridge - ideally we'd refactor to use IAlignment throughout
+
+        // Since SeqLibAlignment wraps a BamRecord but doesn't expose it,
+        // and both use SeqLib::BamRecord as BAMALIGN, we need a workaround.
+        // For now, fall back to legacy reader to avoid breaking changes.
+        // This will be fully implemented in a later step.
+        ERROR("Interface-based alignment reading not yet fully implemented");
+        ERROR("Please use legacy BAM reader (don't inject custom reader)");
+        exit(1);
+    }
+
+    // Legacy path: use bamMultiReader with GETNEXT macro
+    return GETNEXT(bamMultiReader, alignment);
+}
+
 bool AlleleParser::getFirstAlignment(void) {
 
     bool hasAlignments = true;
-    if (!GETNEXT(bamMultiReader, currentAlignment)) {
+    if (!getNextAlignmentInternal(currentAlignment)) {
       hasAlignments = false;
     } else {
       while (!currentAlignment.ISMAPPED) {
-	if (!GETNEXT(bamMultiReader, currentAlignment)) {
+	if (!getNextAlignmentInternal(currentAlignment)) {
 	  hasAlignments = false;
 	  break;
 	}
@@ -2895,7 +2921,7 @@ bool AlleleParser::toNextPosition(void) {
         // here we loop over unaligned reads at the beginning of a target
         // we need to get to a mapped read to figure out where we are
         while (hasMoreAlignments && !currentAlignment.ISMAPPED) {
-            hasMoreAlignments = GETNEXT(bamMultiReader, currentAlignment);
+            hasMoreAlignments = getNextAlignmentInternal(currentAlignment);
         }
         // determine if we have more alignments or not
         if (!hasMoreAlignments) {
@@ -3041,7 +3067,7 @@ bool AlleleParser::dummyProcessNextTarget(void) {
         return false;
     }
 
-    while (GETNEXT(bamMultiReader, currentAlignment)) { }
+    while (getNextAlignmentInternal(currentAlignment)) { }
 
     return true;
 }
