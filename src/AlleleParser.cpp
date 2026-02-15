@@ -879,7 +879,9 @@ bool AlleleParser::inTarget(void) {
 
 // initialization function
 // sets up environment so we can start registering alleles
-AlleleParser::AlleleParser(int argc, char** argv) : parameters(Parameters(argc,argv))
+AlleleParser::AlleleParser(int argc, char** argv, std::unique_ptr<IAlignmentReader> reader)
+    : parameters(Parameters(argc,argv))
+    , alignmentReader_(std::move(reader))
 {
 
     oneSampleAnalysis = false;

@@ -24,6 +24,8 @@
 #include "Sample.h"
 #include "FBFasta.h"
 #include "TryCatch.h"
+#include "IAlignmentReader.h"
+#include <memory>
 
 #include "Genotype.h"
 #include "CNV.h"
@@ -127,7 +129,7 @@ public:
 
     Parameters parameters; // holds operational parameters passed at program invocation
 
-    AlleleParser(int argc, char** argv);
+    AlleleParser(int argc, char** argv, std::unique_ptr<IAlignmentReader> reader = nullptr);
     ~AlleleParser(void);
 
     vector<string> sampleList; // list of sample names, indexed by sample id
@@ -155,6 +157,10 @@ public:
 
     // bamreader
     BAMREADER bamMultiReader;
+
+    // New interface-based alignment reader (for decoupling file format)
+    std::unique_ptr<IAlignmentReader> alignmentReader_;
+    std::shared_ptr<IAlignment> currentAlignment_;
 
     // bed reader
     BedReader bedReader;
