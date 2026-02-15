@@ -4,10 +4,14 @@
                                 // see: http://stackoverflow.com/questions/36039/templates-spread-across-multiple-files
                                 // http://www.cplusplus.com/doc/tutorial/templates/ "Templates and Multi-file projects"
 #include "Logging.h"
+#include "SeqLibAlignmentReader.h"
+#include "AlignmentReaderFactory.h"
 
 using namespace std;
 using freebayes::IAlignment;
 using freebayes::IAlignmentReader;
+using freebayes::SeqLibAlignment;
+using freebayes::SeqLibAlignmentReader;
 
 namespace {  // anonymous namespace
 
@@ -920,6 +924,11 @@ AlleleParser::AlleleParser(int argc, char** argv, std::unique_ptr<IAlignmentRead
     : parameters(Parameters(argc,argv))
     , alignmentReader_(std::move(reader))
 {
+    // Create default SeqLib reader if none provided
+    if (!alignmentReader_) {
+        DEBUG("Creating default SeqLib alignment reader");
+        alignmentReader_ = std::make_unique<SeqLibAlignmentReader>();
+    }
 
     oneSampleAnalysis = false;
     currentRefID = 0; // will get set properly via toNextRefID
@@ -2809,17 +2818,17 @@ bool AlleleParser::getNextAlignmentInternal(BAMALIGN& alignment) {
         }
 
         // Extract underlying BamRecord from SeqLibAlignment
-        // Note: This assumes we're using SeqLibAlignment implementation
-        // For now, we need to access the wrapped record
-        // TODO: This is a temporary bridge - ideally we'd refactor to use IAlignment throughout
+        // We know we're using SeqLibAlignmentReader which returns SeqLibAlignment
+        auto* seqLibAlign = dynamic_cast<SeqLibAlignment*>(currentAlignment_.get());
+        if (!seqLibAlign) {
+            ERROR("Expected SeqLibAlignment but got different implementation");
+            exit(1);
+        }
 
-        // Since SeqLibAlignment wraps a BamRecord but doesn't expose it,
-        // and both use SeqLib::BamRecord as BAMALIGN, we need a workaround.
-        // For now, fall back to legacy reader to avoid breaking changes.
-        // This will be fully implemented in a later step.
-        ERROR("Interface-based alignment reading not yet fully implemented");
-        ERROR("Please use legacy BAM reader (don't inject custom reader)");
-        exit(1);
+        // Copy the underlying BamRecord to the output alignment
+        // Both are SeqLib::BamRecord, so direct assignment works
+        alignment = seqLibAlign->getRecord();
+        return true;
     }
 
     // Legacy path: use bamMultiReader with GETNEXT macro
