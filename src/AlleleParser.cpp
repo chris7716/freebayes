@@ -924,10 +924,26 @@ AlleleParser::AlleleParser(int argc, char** argv, std::unique_ptr<IAlignmentRead
     : parameters(Parameters(argc,argv))
     , alignmentReader_(std::move(reader))
 {
-    // Create default SeqLib reader if none provided
+    // Create reader via factory if none provided
     if (!alignmentReader_) {
-        DEBUG("Creating default SeqLib alignment reader");
-        alignmentReader_ = std::make_unique<SeqLibAlignmentReader>();
+        // Detect format from first input file
+        if (!parameters.bams.empty()) {
+            auto format = freebayes::AlignmentReaderFactory::detectFormat(parameters.bams[0]);
+            DEBUG("Detected alignment format: " << freebayes::AlignmentReaderFactory::formatToString(format));
+
+            // Create reader for detected format
+            std::map<std::string, std::string> options;
+            if (!parameters.fasta.empty()) {
+                options["reference"] = parameters.fasta;
+            }
+
+            alignmentReader_ = freebayes::AlignmentReaderFactory::create(format, options);
+            DEBUG("Created alignment reader via factory");
+        } else {
+            // Fallback: create default SeqLib reader for stdin
+            DEBUG("Creating default SeqLib alignment reader");
+            alignmentReader_ = std::make_unique<SeqLibAlignmentReader>();
+        }
     }
 
     oneSampleAnalysis = false;
