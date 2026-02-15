@@ -6,6 +6,8 @@
 #include "Logging.h"
 
 using namespace std;
+using freebayes::IAlignment;
+using freebayes::IAlignmentReader;
 
 namespace {  // anonymous namespace
 

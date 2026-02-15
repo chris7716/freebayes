@@ -41,6 +41,10 @@
 // increasing this reduces disk access when using haplotype basis alleles, but increases memory usage
 #define CACHED_BASIS_HAPLOTYPE_WINDOW 1000
 
+// Bring interface types into scope
+using freebayes::IAlignment;
+using freebayes::IAlignmentReader;
+
 using namespace std;
 
 // a structure holding information about our parameters
