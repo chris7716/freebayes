@@ -42,10 +42,7 @@ void AlleleParser::openBams(void) {
     if (alignmentReader_) {
         DEBUG("Using interface-based alignment reader");
 
-        // Set reference for CRAM files
-        if (!parameters.fasta.empty()) {
-            alignmentReader_->setReferenceFile(parameters.fasta);
-        }
+        // Reference file already set via factory options, no need to set again
 
         // Open the files
         if (!alignmentReader_->open(parameters.bams)) {
@@ -2830,6 +2827,12 @@ bool AlleleParser::getNextAlignmentInternal(BAMALIGN& alignment) {
     if (alignmentReader_) {
         // Use interface-based reader
         if (!alignmentReader_->getNextAlignment(currentAlignment_)) {
+            return false;
+        }
+
+        // Verify we got a valid alignment
+        if (!currentAlignment_) {
+            ERROR("getNextAlignment returned true but alignment is null");
             return false;
         }
 
