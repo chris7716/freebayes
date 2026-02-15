@@ -34,6 +34,41 @@ void AlleleParser::openBams(void) {
         }
     }
 
+    // Use interface-based reader if provided
+    if (alignmentReader_) {
+        DEBUG("Using interface-based alignment reader");
+
+        // Set reference for CRAM files
+        if (!parameters.fasta.empty()) {
+            alignmentReader_->setReferenceFile(parameters.fasta);
+        }
+
+        // Open the files
+        if (!alignmentReader_->open(parameters.bams)) {
+            ERROR("Could not open input files via alignment reader");
+            cerr << alignmentReader_->getErrorString() << endl;
+            exit(1);
+        }
+
+        // Locate indexes
+        if (!alignmentReader_->locateIndexes()) {
+            ERROR("Opened alignment reader without index file, jumping is disabled.");
+            if (!targets.empty()) {
+                ERROR("Targets specified but no index file provided.");
+                ERROR("FreeBayes cannot jump through targets without index files, exiting.");
+                exit(1);
+            }
+        }
+
+        // Retrieve header information
+        string header = alignmentReader_->getHeaderText();
+        bamHeaderLines = split(header, '\n');
+
+        DEBUG(" done");
+        return;
+    }
+
+    // Legacy path: use bamMultiReader
 #ifdef HAVE_BAMTOOLS
     if (parameters.useStdin) {
         if (!bamMultiReader.Open(parameters.bams)) {
