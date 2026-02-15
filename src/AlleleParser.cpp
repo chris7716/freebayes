@@ -941,8 +941,10 @@ AlleleParser::AlleleParser(int argc, char** argv, std::unique_ptr<IAlignmentRead
         //     DEBUG("Creating default SeqLib alignment reader");
         //     alignmentReader_ = std::make_unique<SeqLibAlignmentReader>();
         // }
-        DEBUG("Creating default SeqLib alignment reader");
-        alignmentReader_ = std::make_unique<SeqLibAlignmentReader>();
+
+        // For now, don't create a default reader - use legacy bamMultiReader instead
+        // alignmentReader_ will only be used if explicitly injected via constructor
+        DEBUG("Using legacy bamMultiReader (interface not created by default)");
     }
 
     oneSampleAnalysis = false;
