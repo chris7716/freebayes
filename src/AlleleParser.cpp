@@ -731,7 +731,14 @@ void AlleleParser::loadReferenceSequence(string& seqname) {
     if (currentSequenceName != seqname) {
         currentSequenceName = seqname;
         currentSequenceStart = 0;
-        currentRefID = bamMultiReader.GETREFID(currentSequenceName);
+
+        // Get reference ID using interface or legacy reader
+        if (alignmentReader_) {
+            currentRefID = alignmentReader_->getReferenceId(currentSequenceName);
+        } else {
+            currentRefID = getReferenceIdInternal(\1);
+        }
+
         currentSequence = uppercase(reference.getRawSequence(currentSequenceName));
         // check the first few characters and verify they are not garbage
         string validBases = "ACGTURYKMSWBDHVN-";
@@ -2395,7 +2402,7 @@ void AlleleParser::getInputVariantsInRegion(string& seq, long start, long end) {
                 genotypeAlleles.push_back(allele);
 
                 if (allele.type != ALLELE_REFERENCE) {
-                    inputVariantAlleles[bamMultiReader.GETREFID(currentVariant->sequenceName)][allele.position].push_back(allele);
+                    inputVariantAlleles[getReferenceIdInternal(\1)][allele.position].push_back(allele);
                     alternatePositions.insert(allele.position);
                 }
             }
@@ -2525,7 +2532,7 @@ void AlleleParser::updateInputVariants(long int pos, int referenceLength) {
                         genotypeAlleles.push_back(allele);
 
                         if (allele.type != ALLELE_REFERENCE) {
-                            inputVariantAlleles[bamMultiReader.GETREFID(allele.referenceName)][allele.position].push_back(allele);
+                            inputVariantAlleles[getReferenceIdInternal(\1)][allele.position].push_back(allele);
                             alternatePositions.insert(allele.position);
                         }
 
@@ -2841,6 +2848,15 @@ bool AlleleParser::loadTarget(BedTarget* target) {
 
 }
 
+// Helper method to get reference ID (interface vs legacy)
+int AlleleParser::getReferenceIdInternal(const std::string& name) {
+    if (alignmentReader_) {
+        return alignmentReader_->getReferenceId(name);
+    } else {
+        return getReferenceIdInternal(\1);
+    }
+}
+
 // Helper method to abstract alignment reading (interface vs legacy)
 bool AlleleParser::getNextAlignmentInternal(BAMALIGN& alignment) {
     if (alignmentReader_) {
@@ -3067,7 +3083,7 @@ bool AlleleParser::toNextPosition(void) {
 
     // and do the same for the variants from the input VCF
     DEBUG2("erasing old input variant alleles");
-    int refid = bamMultiReader.GETREFID(currentSequenceName);
+    int refid = getReferenceIdInternal(\1);
     if (inputVariantAlleles.find(refid) != inputVariantAlleles.end()) {
         map<long int, vector<Allele> >::iterator v = inputVariantAlleles[refid].begin();
         while (v != inputVariantAlleles[refid].end() && v->first < currentPosition) {

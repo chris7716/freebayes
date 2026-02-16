@@ -362,8 +362,9 @@ private:
     BAMALIGN currentAlignment;
     vcflib::Variant* currentVariant;
 
-    // Helper method to abstract alignment reading (interface vs legacy)
+    // Helper methods to abstract alignment reading (interface vs legacy)
     bool getNextAlignmentInternal(BAMALIGN& alignment);
+    int getReferenceIdInternal(const std::string& name);
 
 };
 
