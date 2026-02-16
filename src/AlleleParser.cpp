@@ -650,10 +650,9 @@ void AlleleParser::loadBamReferenceSequenceNames(void) {
         referenceSequences.clear();
         int i = 0;
         for (const auto& refSeq : refSeqs) {
-            // Create a legacy reference structure
-            REFDATA ref;
-            ref.REFNAME = refSeq.name;
-            ref.REFLENGTH = refSeq.length;
+            // Create a legacy reference structure using constructor
+            // SeqLib::HeaderSequence requires (name, length) in constructor
+            REFDATA ref(refSeq.name, refSeq.length);
             referenceSequences.push_back(ref);
             referenceIDToName[i] = refSeq.name;
             ++i;
