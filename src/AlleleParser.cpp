@@ -642,15 +642,35 @@ void AlleleParser::loadBamReferenceSequenceNames(void) {
     // read reference sequences from input file
     //--------------------------------------------------------------------------
 
-    // store the names of all the reference sequences in the BAM file
-    referenceSequences = bamMultiReader.GETREFDATA;
-    int i = 0;
-    for (REFVEC::iterator r = referenceSequences.begin(); r != referenceSequences.end(); ++r) {
-        referenceIDToName[i] = r->REFNAME;
-        ++i;
-    }
+    if (alignmentReader_) {
+        // Use interface-based reader
+        auto refSeqs = alignmentReader_->getReferenceSequences();
 
-    DEBUG("Number of ref seqs: " << bamMultiReader.GETREFNUM);
+        // Convert to legacy format
+        referenceSequences.clear();
+        int i = 0;
+        for (const auto& refSeq : refSeqs) {
+            // Create a legacy reference structure
+            REFDATA ref;
+            ref.REFNAME = refSeq.name;
+            ref.REFLENGTH = refSeq.length;
+            referenceSequences.push_back(ref);
+            referenceIDToName[i] = refSeq.name;
+            ++i;
+        }
+
+        DEBUG("Number of ref seqs: " << refSeqs.size());
+    } else {
+        // Legacy path: use bamMultiReader
+        referenceSequences = bamMultiReader.GETREFDATA;
+        int i = 0;
+        for (REFVEC::iterator r = referenceSequences.begin(); r != referenceSequences.end(); ++r) {
+            referenceIDToName[i] = r->REFNAME;
+            ++i;
+        }
+
+        DEBUG("Number of ref seqs: " << bamMultiReader.GETREFNUM);
+    }
 }
 
 
@@ -924,27 +944,23 @@ AlleleParser::AlleleParser(int argc, char** argv, std::unique_ptr<IAlignmentRead
     // Create reader via factory if none provided
     if (!alignmentReader_) {
         // Detect format from first input file
-        // if (!parameters.bams.empty()) {
-        //     auto format = freebayes::AlignmentReaderFactory::detectFormat(parameters.bams[0]);
-        //     DEBUG("Detected alignment format: " << freebayes::AlignmentReaderFactory::formatToString(format));
+        if (!parameters.bams.empty()) {
+            auto format = freebayes::AlignmentReaderFactory::detectFormat(parameters.bams[0]);
+            DEBUG("Detected alignment format: " << freebayes::AlignmentReaderFactory::formatToString(format));
 
-        //     // Create reader for detected format
-        //     std::map<std::string, std::string> options;
-        //     if (!parameters.fasta.empty()) {
-        //         options["reference"] = parameters.fasta;
-        //     }
+            // Create reader for detected format
+            std::map<std::string, std::string> options;
+            if (!parameters.fasta.empty()) {
+                options["reference"] = parameters.fasta;
+            }
 
-        //     alignmentReader_ = freebayes::AlignmentReaderFactory::create(format, options);
-        //     DEBUG("Created alignment reader via factory");
-        // } else {
-        //     // Fallback: create default SeqLib reader for stdin
-        //     DEBUG("Creating default SeqLib alignment reader");
-        //     alignmentReader_ = std::make_unique<SeqLibAlignmentReader>();
-        // }
-
-        // For now, don't create a default reader - use legacy bamMultiReader instead
-        // alignmentReader_ will only be used if explicitly injected via constructor
-        DEBUG("Using legacy bamMultiReader (interface not created by default)");
+            alignmentReader_ = freebayes::AlignmentReaderFactory::create(format, options);
+            DEBUG("Created alignment reader via factory");
+        } else {
+            // Fallback: create default SeqLib reader for stdin
+            DEBUG("Creating default SeqLib alignment reader");
+            alignmentReader_ = std::make_unique<SeqLibAlignmentReader>();
+        }
     }
 
     oneSampleAnalysis = false;
