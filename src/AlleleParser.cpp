@@ -736,7 +736,7 @@ void AlleleParser::loadReferenceSequence(string& seqname) {
         if (alignmentReader_) {
             currentRefID = alignmentReader_->getReferenceId(currentSequenceName);
         } else {
-            currentRefID = getReferenceIdInternal(\1);
+            currentRefID = bamMultiReader.GETREFID(currentSequenceName);
         }
 
         currentSequence = uppercase(reference.getRawSequence(currentSequenceName));
@@ -2402,7 +2402,7 @@ void AlleleParser::getInputVariantsInRegion(string& seq, long start, long end) {
                 genotypeAlleles.push_back(allele);
 
                 if (allele.type != ALLELE_REFERENCE) {
-                    inputVariantAlleles[getReferenceIdInternal(\1)][allele.position].push_back(allele);
+                    inputVariantAlleles[getReferenceIdInternal(currentVariant->sequenceName)][allele.position].push_back(allele);
                     alternatePositions.insert(allele.position);
                 }
             }
@@ -2532,7 +2532,7 @@ void AlleleParser::updateInputVariants(long int pos, int referenceLength) {
                         genotypeAlleles.push_back(allele);
 
                         if (allele.type != ALLELE_REFERENCE) {
-                            inputVariantAlleles[getReferenceIdInternal(\1)][allele.position].push_back(allele);
+                            inputVariantAlleles[getReferenceIdInternal(allele.referenceName)][allele.position].push_back(allele);
                             alternatePositions.insert(allele.position);
                         }
 
@@ -2853,7 +2853,7 @@ int AlleleParser::getReferenceIdInternal(const std::string& name) {
     if (alignmentReader_) {
         return alignmentReader_->getReferenceId(name);
     } else {
-        return getReferenceIdInternal(\1);
+        return bamMultiReader.GETREFID(name);
     }
 }
 
@@ -3083,7 +3083,7 @@ bool AlleleParser::toNextPosition(void) {
 
     // and do the same for the variants from the input VCF
     DEBUG2("erasing old input variant alleles");
-    int refid = getReferenceIdInternal(\1);
+    int refid = getReferenceIdInternal(currentSequenceName);
     if (inputVariantAlleles.find(refid) != inputVariantAlleles.end()) {
         map<long int, vector<Allele> >::iterator v = inputVariantAlleles[refid].begin();
         while (v != inputVariantAlleles[refid].end() && v->first < currentPosition) {
