@@ -272,6 +272,27 @@ test_alignment_interfaces = executable(
     build_by_default: false
 )
 
+test_interface_crash = executable(
+    'test_interface_crash',
+    files('test/test_interface_crash.cpp'),
+    include_directories : [incdir, vcflib_inc, fastahack_inc],
+    cpp_args : extra_cpp_args,
+    link_args: link_arguments,
+    dependencies: [zlib_dep,
+                   lzma_dep,
+                   wfa2lib_dep,
+                   vcflib_dep,
+                   thread_dep,
+                   htslib_dep,
+                   tabixpp_dep,
+                   seqlib_dep,
+                   fastahack_dep,
+                   smithwaterman_dep
+                   ],
+    link_with : [freebayes_lib],
+    build_by_default: false
+)
+
 # Bash TAP tests
 prove = find_program('prove')
 test('T00', prove, args : ['-e','bash','-v','t/00_region_and_target_handling.t'], workdir: testdir)
