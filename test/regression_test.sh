@@ -50,6 +50,11 @@ run_test() {
 
     echo ""
     echo "Running test: ${test_name}"
+    echo "  binary:    ${FREEBAYES}"
+    echo "  reference: ${ref}"
+    echo "  bam:       ${bam}"
+    echo "  args:      ${extra_args:-<none>}"
+    echo "  command:   ${FREEBAYES} -f ${ref} ${extra_args} ${bam}"
 
     local baseline="${BASELINE_DIR}/${test_name}.vcf"
     local output="${OUTPUT_DIR}/${test_name}.vcf"
