@@ -41,7 +41,10 @@ if not lz4_dep.found()
 endif
 zstd_dep = dependency('libzstd', static: static_build, required: false)
 if not zstd_dep.found()
-  zstd_dep = cc.find_library('zstd', required: true, static: static_build)
+  zstd_dep = cc.find_library('zstd', required: false, static: false)
+endif
+if not zstd_dep.found()
+  zstd_dep = cc.find_library('zstd', required: true, static: true)
 endif
 brotli_dec_dep = dependency('libbrotlidec', static: static_build, required: false)
 if not brotli_dec_dep.found()
