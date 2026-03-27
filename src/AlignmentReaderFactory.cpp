@@ -1,5 +1,6 @@
 #include "AlignmentReaderFactory.h"
 #include "SeqLibAlignmentReader.h"
+#include "GBAMAlignmentReader.h"
 #include <fstream>
 #include <algorithm>
 #include <cctype>
@@ -44,7 +45,7 @@ std::unique_ptr<IAlignmentReader> AlignmentReaderFactory::create(
         }
 
         case AlignmentFormat::GBAM:
-            throw std::runtime_error("GBAM format not yet implemented");
+            return std::make_unique<GBAMAlignmentReader>();
 
         default:
             throw std::runtime_error("Unknown alignment format");

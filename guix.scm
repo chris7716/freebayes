@@ -214,6 +214,9 @@
        ("zlib" ,zlib)
        ("xz" ,xz)          ; liblzma part of htslib
        ("bzip2" ,bzip2)    ; libz2 part of htslib
+       ("lz4" ,lz4)        ; gbam codec
+       ("zstd" ,zstd)      ; gbam codec
+       ("brotli" ,brotli)  ; gbam codec
        ))
     (arguments
      (list

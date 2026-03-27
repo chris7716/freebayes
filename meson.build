@@ -35,6 +35,10 @@ thread_dep = dependency('threads', static: static_build)
 wfa2lib_dep = cc.find_library('wfa2') # need to link for vcflib code
 zlib_dep = dependency('zlib', static: static_build)
 htslib_dep = dependency('htslib', static: static_build, required: false)
+lz4_dep = dependency('liblz4', static: static_build, required: true)
+zstd_dep = dependency('libzstd', static: static_build, required: true)
+brotli_dec_dep = dependency('libbrotlidec', static: static_build, required: true)
+brotli_enc_dep = dependency('libbrotlienc', static: static_build, required: true)
 vcflib_dep = cc.find_library('vcflib', required: false, static: static_build)
 seqlib_dep = dependency('libseqlib', static: static_build, required: false)
 tabixpp_dep = cc.find_library('tabixpp', required: false, static: static_build)
@@ -149,7 +153,10 @@ freebayes_common_src = files(
     'src/Sample.cpp',
     'src/SegfaultHandler.cpp',
     'src/SeqLibAlignmentReader.cpp',
+    'src/GBAMAlignmentReader.cpp',
     'src/Utility.cpp',
+    'gbam/reader.cpp',
+    'gbam/codec.cpp',
     )
 
 freebayes_src = files('src/freebayes.cpp')
@@ -162,6 +169,8 @@ freebayes_common_src += smithwaterman_src
 incdir = include_directories(
     'src',
     'contrib/ttmath',
+    'gbam',
+    'gbam/third_party',
     )
 
 extra_cpp_args = cc.get_supported_arguments(
@@ -179,7 +188,7 @@ freebayes_lib = static_library(
     include_directories : [incdir, vcflib_inc, smithwaterman_inc, fastahack_inc],
     cpp_args : extra_cpp_args,
     dependencies : [vcflib_dep, zlib_dep, lzma_dep, thread_dep, htslib_dep, tabixpp_dep,
-                    wfa2lib_dep, seqlib_dep],
+                    wfa2lib_dep, seqlib_dep, lz4_dep, zstd_dep, brotli_dec_dep, brotli_enc_dep],
     install : false,
     )
 
