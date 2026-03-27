@@ -35,10 +35,22 @@ thread_dep = dependency('threads', static: static_build)
 wfa2lib_dep = cc.find_library('wfa2') # need to link for vcflib code
 zlib_dep = dependency('zlib', static: static_build)
 htslib_dep = dependency('htslib', static: static_build, required: false)
-lz4_dep = dependency('liblz4', static: static_build, required: true)
-zstd_dep = dependency('libzstd', static: static_build, required: true)
-brotli_dec_dep = dependency('libbrotlidec', static: static_build, required: true)
-brotli_enc_dep = dependency('libbrotlienc', static: static_build, required: true)
+lz4_dep = dependency('liblz4', static: static_build, required: false)
+if not lz4_dep.found()
+  lz4_dep = cc.find_library('lz4', required: true, static: static_build)
+endif
+zstd_dep = dependency('libzstd', static: static_build, required: false)
+if not zstd_dep.found()
+  zstd_dep = cc.find_library('zstd', required: true, static: static_build)
+endif
+brotli_dec_dep = dependency('libbrotlidec', static: static_build, required: false)
+if not brotli_dec_dep.found()
+  brotli_dec_dep = cc.find_library('brotlidec', required: true, static: static_build)
+endif
+brotli_enc_dep = dependency('libbrotlienc', static: static_build, required: false)
+if not brotli_enc_dep.found()
+  brotli_enc_dep = cc.find_library('brotlienc', required: true, static: static_build)
+endif
 vcflib_dep = cc.find_library('vcflib', required: false, static: static_build)
 seqlib_dep = dependency('libseqlib', static: static_build, required: false)
 tabixpp_dep = cc.find_library('tabixpp', required: false, static: static_build)
