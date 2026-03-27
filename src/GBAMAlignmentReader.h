@@ -52,6 +52,9 @@ public:
     bool getTag(const std::string& tag, int& value) const override;
     bool getTag(const std::string& tag, double& value) const override;
 
+    // Access the underlying htslib record (for SeqLib interop).
+    bam1_t* getRawRecord() const { return record_; }
+
 private:
     bam1_t* record_;
 };

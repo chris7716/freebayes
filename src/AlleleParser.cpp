@@ -5,6 +5,7 @@
                                 // http://www.cplusplus.com/doc/tutorial/templates/ "Templates and Multi-file projects"
 #include "Logging.h"
 #include "SeqLibAlignmentReader.h"
+#include "GBAMAlignmentReader.h"
 #include "AlignmentReaderFactory.h"
 
 using namespace std;
@@ -12,6 +13,7 @@ using freebayes::IAlignment;
 using freebayes::IAlignmentReader;
 using freebayes::SeqLibAlignment;
 using freebayes::SeqLibAlignmentReader;
+using freebayes::GBAMAlignment;
 
 namespace {  // anonymous namespace
 
@@ -2871,18 +2873,21 @@ bool AlleleParser::getNextAlignmentInternal(BAMALIGN& alignment) {
             return false;
         }
 
-        // Extract underlying BamRecord from SeqLibAlignment
-        // We know we're using SeqLibAlignmentReader which returns SeqLibAlignment
+        // Extract underlying BamRecord for downstream processing.
         auto* seqLibAlign = dynamic_cast<SeqLibAlignment*>(currentAlignment_.get());
-        if (!seqLibAlign) {
-            ERROR("Expected SeqLibAlignment but got different implementation");
-            exit(1);
+        if (seqLibAlign) {
+            alignment = seqLibAlign->getRecord();
+            return true;
         }
 
-        // Copy the underlying BamRecord to the output alignment
-        // Both are SeqLib::BamRecord, so direct assignment works
-        alignment = seqLibAlign->getRecord();
-        return true;
+        auto* gbamAlign = dynamic_cast<GBAMAlignment*>(currentAlignment_.get());
+        if (gbamAlign) {
+            alignment.assign(bam_dup1(gbamAlign->getRawRecord()));
+            return true;
+        }
+
+        ERROR("Unknown IAlignment implementation");
+        exit(1);
     }
 
     // Legacy path: use bamMultiReader with GETNEXT macro
