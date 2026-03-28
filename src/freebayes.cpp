@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <cmath>
 #include <time.h>
+#include <chrono>
 #include <float.h>
 #include <stdlib.h>
 
@@ -113,6 +114,8 @@ int main (int argc, char *argv[]) {
 
     unsigned long total_sites = 0;
     unsigned long processed_sites = 0;
+
+    auto t_start = std::chrono::steady_clock::now();
 
     while (parser->getNextAlleles(samples, allowedAlleleTypes)) {
 
@@ -689,6 +692,15 @@ int main (int argc, char *argv[]) {
         out << results.gvcf(var, nonCalls, parser) << endl;
         nonCalls.clear();
     }
+
+    auto t_end = std::chrono::steady_clock::now();
+    double elapsed = std::chrono::duration<double>(t_end - t_start).count();
+
+    cerr << "[profiling] elapsed: " << elapsed << " s"
+         << "  total_sites: " << total_sites
+         << "  processed_sites: " << processed_sites
+         << "  sites/s: " << (elapsed > 0 ? total_sites / elapsed : 0)
+         << endl;
 
     DEBUG("total sites: " << total_sites << endl
           << "processed sites: " << processed_sites << endl
