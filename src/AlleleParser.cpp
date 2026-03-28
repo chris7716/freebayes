@@ -2811,6 +2811,12 @@ bool AlleleParser::loadTarget(BedTarget* target) {
     currentPosition = currentTarget->left;
     rightmostHaplotypeBasisAllelePosition = currentTarget->left;
 
+    if (alignmentReader_) {
+        if (!alignmentReader_->setRegion(currentRefID, currentTarget->left, currentTarget->right + 1)) {
+            ERROR("Could not SetRegion to " << currentTarget->seq << ":" << currentTarget->left << ".." << currentTarget->right + 1);
+            return false;
+        }
+    } else {
 #ifdef HAVE_BAMTOOLS
     if (!bamMultiReader.SetRegion(currentRefID, currentTarget->left, currentRefID, currentTarget->right + 1)) { // bamtools expects 0-based, half-open
         ERROR("Could not SetRegion to " << currentTarget->seq << ":" << currentTarget->left << ".." << currentTarget->right + 1);
@@ -2823,6 +2829,7 @@ bool AlleleParser::loadTarget(BedTarget* target) {
         return false;
     }
 #endif
+    }
 
     if (variantCallInputFile.is_open()) {
         stringstream r;
