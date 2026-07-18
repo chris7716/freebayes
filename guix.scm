@@ -74,11 +74,9 @@
         #~(modify-phases #$phases
             (add-after 'unpack 'fix-cstdint
               (lambda _
-                (for-each
-                  (lambda (file)
-                    (invoke "sed" "-i" "1i #include <cstdint>" file))
-                  (list "system/mm_stack.h"
-                        "bindings/cpp/WFAligner.cpp"))))))))))
+                ;; mm_stack.h is included by C files, so use <stdint.h> not <cstdint>
+                (invoke "sed" "-i" "1i #include <stdint.h>" "system/mm_stack.h")
+                (invoke "sed" "-i" "1i #include <cstdint>" "bindings/cpp/WFAligner.cpp")))))))))
 
 (define-public vcflib-github ;; should update upstream
   (let ((commit
