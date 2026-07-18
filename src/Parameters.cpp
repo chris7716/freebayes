@@ -175,7 +175,7 @@ void Parameters::usage(char** argv) {
         << "   -T --theta N    The expected mutation rate or pairwise nucleotide diversity" << endl
         << "                   among the population under analysis.  This serves as the" << endl
         << "                   single parameter to the Ewens Sampling Formula prior model" << endl
-        << "                   default: 0.01"  endl
+        << "                   default: 0.01" << endl
         << "   -p --ploidy N   Sets the default ploidy for the analysis to N.  default: 2" << endl
         << "   -J --pooled-discrete" << endl
         << "                   Assume that samples result from pooled sequencing." << endl
