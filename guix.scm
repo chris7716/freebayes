@@ -76,9 +76,7 @@
               (lambda _
                 (for-each
                   (lambda (file)
-                    (let* ((content (with-input-from-file file read-string))
-                           (patched (string-append "#include <cstdint>\n" content)))
-                      (with-output-to-file file (lambda () (display patched)))))
+                    (invoke "sed" "-i" "1i #include <cstdint>" file))
                   (list "system/mm_stack.h"
                         "bindings/cpp/WFAligner.cpp"))))))))))
 
