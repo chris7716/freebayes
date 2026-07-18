@@ -63,6 +63,25 @@
 (define %git-commit
     (read-string (open-pipe "git show HEAD | head -1 | cut -d ' ' -f 2" OPEN_READ)))
 
+;; wfa2-lib 2.3.3 omits #include <cstdint> in two files, breaking GCC 13+.
+(define-public wfa2-lib-fixed
+  (package
+    (inherit wfa2-lib)
+    (name "wfa2-lib-fixed")
+    (arguments
+     (substitute-keyword-arguments (package-arguments wfa2-lib)
+       ((#:phases phases '%standard-phases)
+        #~(modify-phases #$phases
+            (add-after 'unpack 'fix-cstdint
+              (lambda _
+                (for-each
+                  (lambda (file)
+                    (let* ((content (with-input-from-file file read-string))
+                           (patched (string-append "#include <cstdint>\n" content)))
+                      (with-output-to-file file (lambda () (display patched)))))
+                  (list "system/mm_stack.h"
+                        "bindings/cpp/WFAligner.cpp"))))))))))
+
 (define-public vcflib-github ;; should update upstream
   (let ((commit
          "9e8c0192d677bddd68eb2743ff9ec194995e92b7"
@@ -103,7 +122,7 @@
        smithwaterman
        tabixpp
        time ; for tests
-       wfa2-lib ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
+       wfa2-lib-fixed ; alternative:  cmake  -DCMAKE_BUILD_TYPE=Debug -DWFA_GITMODULE=ON -DZIG=ON ..
        xz
        ;; zig-0.14
        ))
@@ -192,7 +211,7 @@
        ("smithwaterman" ,smithwaterman) ; vcflib shared lib dependency ; bundle for Debian
        ("tabixpp" ,tabixpp)    ; for htslib
        ("vcflib-github" ,vcflib-github)  ; for includes and testing freebayes-parallel
-       ("wfa2-lib" ,wfa2-lib)  ; vcflib shared lib dependency
+       ("wfa2-lib" ,wfa2-lib-fixed)  ; vcflib shared lib dependency
        ("which" ,which)))        ; for version
     (native-inputs
      `(
