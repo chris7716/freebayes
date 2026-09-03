@@ -32,7 +32,7 @@ cc = meson.get_compiler('cpp')
 
 lzma_dep = dependency('liblzma', static: static_build)
 thread_dep = dependency('threads', static: static_build)
-wfa2lib_dep = cc.find_library('wfa2') # need to link for vcflib code
+wfa2lib_dep = cc.find_library('wfa2', required: false) # only used by full vcflib; unused by contrib/vcflib-min, absent from current Guix
 zlib_dep = dependency('zlib', static: static_build)
 htslib_dep = dependency('htslib', static: static_build, required: false)
 vcflib_dep = cc.find_library('vcflib', required: false, static: static_build)
@@ -222,6 +222,42 @@ executable('bamleftalign',
                           smithwaterman_dep, # for vcflib
                           wfa2lib_dep],
            link_with : freebayes_lib,
+           install: true
+          )
+
+# --- panFreebayes: extracted core engine (Milestone 1) ---------------------
+# Additive only: reuses libfreebayes_common.a, does not touch the freebayes or
+# bamleftalign targets. `panfreebayes_core.cpp` carries its own copy of the
+# src/freebayes.cpp main-loop body (kept in lock-step until refactored).
+panfreebayes_core_lib = static_library(
+    'panfreebayes_core',
+    files(
+        'src/panfreebayes/panfreebayes_core.cpp',
+    ),
+    pic: false,
+    include_directories : [incdir, vcflib_inc, smithwaterman_inc, fastahack_inc],
+    cpp_args : extra_cpp_args,
+    dependencies : [vcflib_dep, zlib_dep, lzma_dep, thread_dep, htslib_dep,
+                    tabixpp_dep, wfa2lib_dep, seqlib_dep],
+    install : false,
+    )
+
+executable('panfreebayes',
+           files('src/panfreebayes/panfreebayes_main.cpp'),
+           include_directories : [incdir, vcflib_inc, fastahack_inc],
+           cpp_args : extra_cpp_args,
+           link_args: link_arguments,
+           dependencies: [zlib_dep,
+                          lzma_dep,
+                          wfa2lib_dep,
+                          vcflib_dep,
+                          thread_dep,
+                          htslib_dep,
+                          tabixpp_dep,
+                          seqlib_dep,
+                          fastahack_dep,
+                          smithwaterman_dep],
+           link_with : [panfreebayes_core_lib, freebayes_lib],
            install: true
           )
 
