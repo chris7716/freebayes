@@ -51,6 +51,51 @@ using namespace std;
 
 namespace panfreebayes {
 
+// ---------------------------------------------------------------------------
+// Milestone 1, "Step 2" (decision 2).
+//
+// Decision 2 asked for reads to be pre-registered rather than streamed through
+// a bounded queue, with the stated goal of removing the BAM-index /
+// region-iteration dependency. Investigating that change surfaced that:
+//
+//   - AlleleParser::updateAlignmentQueue() only ever pulls reads with
+//     POSITION <= currentPosition (AlleleParser.cpp:1978, 2118-2120), so
+//     buildHaplotypeAlleles' window-growth loop (AlleleParser.cpp:3266-3280)
+//     can only see reads that already ended inside the growing window, never
+//     ones that merely *start* inside it. Pre-registering all reads gives it
+//     those too, which can grow haplotypeLength further, change `theta`
+//     (freebayes.cpp:309), and change which sites get absorbed into a
+//     haplotype block -- i.e. it can change the call set. That would mean
+//     panfreebayes could no longer reproduce freebayes' 1,413 / 2,451
+//     acceptance numbers, and "provably identical before/after" would not
+//     hold (flagged and resolved with the supervisor 2026-09-04/05).
+//
+//   - Separately, and this is what actually closes decision 2's real goal:
+//     the SeqLib BAM backend this build uses (HAVE_BAMTOOLS undefined) never
+//     calls LocateIndexes() at all (AlleleParser.cpp's non-BAMTOOLS
+//     openBams() branch has that call commented out), and
+//     AlleleParser::loadTarget()'s bamMultiReader.SetRegion() -- the only
+//     index-dependent seek in the engine -- is reachable only when
+//     `parameters.targets` is non-empty, i.e. only when -r/--region or
+//     -t/--targets is passed. buildArgv() above never emits either flag.
+//     So panfreebayes already runs FreeBayes's no-targets, whole-BAM,
+//     index-free streaming path *by construction* -- with byte-identical
+//     behaviour to stock freebayes, confirmed by the Step 1 smoke test.
+//
+// So "Step 2" is not an engine change: it is making that already-true
+// invariant impossible to break by accident (a caller smuggling -r/-t/--stdin
+// into extraArgs would silently re-enable the index-seeking path). Reads
+// still stream positionally through the exact unmodified AlleleParser code.
+// ---------------------------------------------------------------------------
+namespace {
+bool isRegionOrTargetFlag(const std::string& tok) {
+    static const std::vector<std::string> disallowed = {
+        "-r", "--region", "-t", "--targets", "-c", "--stdin", "-L", "--bam-list",
+    };
+    return std::find(disallowed.begin(), disallowed.end(), tok) != disallowed.end();
+}
+} // namespace
+
 std::vector<std::string> buildArgv(const Options& opt) {
     std::vector<std::string> a;
     a.push_back("freebayes");
@@ -88,6 +133,20 @@ int callVariants(const Options& opt, std::ostream& out) {
 // The lifted engine loop.
 // ---------------------------------------------------------------------------
 int callVariantsArgv(const std::vector<std::string>& argvStrings, std::ostream& outStream) {
+
+    // Guarantee the no-targets, index-free, whole-BAM streaming path (see the
+    // comment above isRegionOrTargetFlag()): reject -r/-t/--stdin/etc. rather
+    // than silently falling onto AlleleParser's index-seeking SetRegion() path.
+    for (const auto& tok : argvStrings) {
+        if (isRegionOrTargetFlag(tok)) {
+            std::cerr << "panfreebayes: '" << tok << "' is not supported -- "
+                       << "panfreebayes always analyses the entire supplied "
+                       << "reference/BAM as one region (no -r/-t/--stdin/-L). "
+                       << "Extract the region into its own reference FASTA + BAM "
+                       << "upstream instead." << std::endl;
+            return 1;
+        }
+    }
 
     // marshal argv
     std::vector<char*> argv;

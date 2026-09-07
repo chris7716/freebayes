@@ -15,7 +15,9 @@
 //     likelihoods -> Bayesian combo search -> VCF record)
 //   - no region (-r) / target (-t) selection, no BAM-index jumping:
 //     the whole reference is swept, exactly as `freebayes -f ref.fa aln.bam`
-//     with no region flags.
+//     with no region flags. This is enforced, not just the default: passing
+//     -r/-t/--stdin/-L (directly or via Options::extraArgs) is rejected, so
+//     the index-seeking code path can never be reached silently.
 //
 // Behaviour is intended to be BIT-FOR-BIT identical to running the stock
 // `freebayes` binary with the equivalent arguments. In particular the global

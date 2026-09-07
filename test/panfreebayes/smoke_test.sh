@@ -76,6 +76,18 @@ python3 "$here/make_synthetic_bam.py" --ref "$REF" --out "$work/spike.bam" \
 run_case spike        "$work/spike.bam" "${ACC_ARGS[@]}"
 run_case spike_nolimit "$work/spike.bam" --pooled-continuous --min-alternate-count 2 --min-alternate-fraction 0.2
 
+echo "=== case: region_flag_rejected ==="
+if "$PFB" --ref "$REF" --bam "$work/flat.bam" -- -r foo:1-2 \
+      > "$work/region.out" 2> "$work/region.err"; then
+  echo "  FAILED: panfreebayes accepted -r instead of rejecting it"; FAIL=1
+else
+  if grep -q "not supported" "$work/region.err"; then
+    echo "  correctly rejected -r (region/target flags must stay unreachable)"
+  else
+    echo "  FAILED: rejected -r for the wrong reason:"; cat "$work/region.err"; FAIL=1
+  fi
+fi
+
 echo
 if [ "$FAIL" = 0 ]; then
   echo "SMOKE TEST PASSED — extracted core matches freebayes on all cases"
